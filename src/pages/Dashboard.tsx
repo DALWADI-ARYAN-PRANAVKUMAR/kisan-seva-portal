@@ -1,32 +1,55 @@
+import { useEffect, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Wallet, Package, Star, Plus, LayoutGrid, History, Tractor, BarChart3, IndianRupee, Eye } from "lucide-react";
+import { Wallet, Package, Star, Plus, LayoutGrid, History, Tractor, BarChart3, IndianRupee, Eye, Trash2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/providers/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { PostCropDialog } from "@/components/PostCropDialog";
+import { toast } from "sonner";
+
+type Listing = {
+  id: string; title: string; price_per_kg: number; stock_kg: number; views: number | null;
+  image_url: string | null; status: string; rating: number | null; unit: string;
+};
+type Order = {
+  id: string; total_amount: number; status: string; created_at: string;
+  delivery_name: string | null;
+};
 
 const Dashboard = () => {
   const { t } = useTranslation();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [postOpen, setPostOpen] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!user) { setLoading(false); return; }
+    setLoading(true);
+    const [l, o] = await Promise.all([
+      supabase.from("listings").select("*").eq("seller_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("orders").select("id, total_amount, status, created_at, delivery_name").order("created_at", { ascending: false }).limit(10),
+    ]);
+    setListings((l.data || []) as Listing[]);
+    setOrders((o.data || []) as Order[]);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const totalSales = orders.filter((o) => o.status === "completed").reduce((s, o) => s + Number(o.total_amount), 0);
+  const totalStock = listings.reduce((s, l) => s + (l.stock_kg || 0), 0);
+  const avgRating = listings.length ? (listings.reduce((s, l) => s + (Number(l.rating) || 0), 0) / listings.length).toFixed(1) : "—";
 
   const stats = [
-    { icon: Wallet, label: t("dashboard.totalSales"), value: "₹45,200", sub: t("dashboard.totalSalesSub"), color: "text-secondary bg-secondary/10" },
-    { icon: Package, label: t("dashboard.currentStock"), value: "1,250 kg", sub: t("dashboard.currentStockSub"), color: "text-primary bg-primary/10" },
-    { icon: Star, label: t("dashboard.avgRating"), value: "4.8", sub: t("dashboard.avgRatingSub"), color: "text-amber-600 bg-amber-500/10 dark:text-amber-400" },
-  ];
-
-  const listings = [
-    { title: "Premium Sharbati Wheat", price: 32, kg: 500, views: 124, img: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600" },
-    { title: "Organic Green Peas", price: 85, kg: 150, views: 89, img: "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=600" },
-  ];
-
-  const inquiries = [
-    { name: "Anil Kumar", msg: "Interested in bulk order fo...", time: "2h ago", color: "bg-tertiary-500 bg-indigo-500" },
-    { name: "Mandi Traders", msg: "What is the latest price for...", time: "5h ago", color: "bg-orange-500" },
-    { name: "Rahul Sharma", msg: "Can you arrange transport...", time: "1d ago", color: "bg-secondary" },
-  ];
-
-  const orders = [
-    { id: "#ORD-8924", crop: "Premium Sharbati Wheat", buyer: "Gopal Krishnan", qty: "200 kg", amt: "6,400", status: "completed" },
-    { id: "#ORD-8912", crop: "Organic Green Peas", buyer: "Suresh Meena", qty: "50 kg", amt: "4,250", status: "processing" },
+    { icon: Wallet, label: t("dashboard.totalSales"), value: `₹${totalSales.toLocaleString("en-IN")}`, sub: t("dashboard.totalSalesSub"), color: "text-secondary bg-secondary/10" },
+    { icon: Package, label: t("dashboard.currentStock"), value: `${totalStock}`, sub: t("dashboard.currentStockSub"), color: "text-primary bg-primary/10" },
+    { icon: Star, label: t("dashboard.avgRating"), value: String(avgRating), sub: t("dashboard.avgRatingSub"), color: "text-amber-600 bg-amber-500/10 dark:text-amber-400" },
   ];
 
   const navItems = [
@@ -37,6 +60,23 @@ const Dashboard = () => {
     { icon: BarChart3, key: "analytics" },
   ];
 
+  const deleteListing = async (id: string) => {
+    if (!confirm("Remove this listing?")) return;
+    const { error } = await supabase.from("listings").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Listing removed");
+    load();
+  };
+
+  const handlePostClick = () => {
+    if (!user) {
+      sessionStorage.setItem("ks_post_auth", "/dashboard");
+      navigate("/auth?from=dashboard");
+      return;
+    }
+    setPostOpen(true);
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -45,9 +85,9 @@ const Dashboard = () => {
           <aside className="rounded-2xl bg-card border border-border p-4 h-fit shadow-soft lg:sticky lg:top-20">
             <div className="flex items-center gap-3 px-2 pb-4 mb-3 border-b border-border">
               <div className="h-11 w-11 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Tractor className="h-5 w-5" /></div>
-              <div>
-                <p className="font-display font-bold text-secondary">{t("dashboard.portal")}</p>
-                <p className="text-xs text-muted-foreground">{t("dashboard.verifiedSeller")}</p>
+              <div className="min-w-0">
+                <p className="font-display font-bold text-secondary truncate">{profile?.full_name || t("dashboard.portal")}</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1"><ShieldCheck className="h-3 w-3" />{t("dashboard.verifiedSeller")}</p>
               </div>
             </div>
             <nav className="space-y-1">
@@ -58,14 +98,18 @@ const Dashboard = () => {
                 </button>
               ))}
             </nav>
-            <Button className="w-full mt-5 bg-primary hover:bg-primary/90 shadow-soft"><Plus className="h-4 w-4 mr-2" />{t("dashboard.post")}</Button>
+            <Button onClick={handlePostClick} className="w-full mt-5 bg-primary hover:bg-primary/90 shadow-soft">
+              <Plus className="h-4 w-4 mr-2" />{t("dashboard.post")}
+            </Button>
           </aside>
 
           {/* Main */}
           <div className="space-y-6">
             <div>
               <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-display text-3xl md:text-4xl font-bold">{t("dashboard.overview")}</motion.h1>
-              <p className="text-sm text-muted-foreground mt-1">{t("dashboard.overviewSub")}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {user ? `Welcome back${profile?.full_name ? `, ${profile.full_name}` : ""}!` : "Sign in to manage your crops and orders."}
+              </p>
             </div>
 
             {/* Stat cards */}
@@ -82,63 +126,61 @@ const Dashboard = () => {
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-[1fr_280px] gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-display text-xl font-bold">{t("dashboard.myListings")}</h2>
-                    <p className="text-xs text-muted-foreground">{t("dashboard.myListingsSub")}</p>
-                  </div>
-                  <button className="text-sm text-secondary font-semibold hover:underline">{t("dashboard.viewAll")} →</button>
+            {/* My Listings */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-display text-xl font-bold">{t("dashboard.myListings")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.myListingsSub")}</p>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <Button onClick={handlePostClick} size="sm" variant="outline"><Plus className="h-3.5 w-3.5 mr-1.5" />{t("dashboard.post")}</Button>
+              </div>
+
+              {loading ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => <div key={i} className="rounded-2xl bg-muted h-72 animate-pulse" />)}
+                </div>
+              ) : listings.length === 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border-2 border-dashed border-border p-10 text-center">
+                  <Tractor className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
+                  <p className="font-semibold mb-1">No listings yet</p>
+                  <p className="text-sm text-muted-foreground mb-4">Post your first crop and reach buyers in minutes.</p>
+                  <Button onClick={handlePostClick} className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-1.5" />{t("dashboard.post")}</Button>
+                </motion.div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {listings.map((l, i) => (
-                    <motion.div key={l.title} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.08 }} className="rounded-2xl bg-card border border-border overflow-hidden hover-lift shadow-soft">
+                    <motion.div key={l.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.06 }} className="rounded-2xl bg-card border border-border overflow-hidden hover-lift shadow-soft">
                       <div className="relative h-36 bg-muted">
-                        <img src={l.img} alt={l.title} className="h-full w-full object-cover" />
-                        <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-secondary text-secondary-foreground">IN STOCK</span>
+                        {l.image_url ? (
+                          <img src={l.image_url} alt={l.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-muted-foreground"><Tractor className="h-10 w-10 opacity-30" /></div>
+                        )}
+                        <span className={`absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${l.status === "in_stock" ? "bg-secondary text-secondary-foreground" : "bg-amber-500 text-white"}`}>
+                          {l.status === "in_stock" ? "IN STOCK" : "HARVESTING"}
+                        </span>
                       </div>
                       <div className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-semibold">{l.title}</p>
-                          <p className="font-bold text-secondary">₹{l.price}/kg</p>
+                        <div className="flex items-center justify-between mb-2 gap-2">
+                          <p className="font-semibold truncate">{l.title}</p>
+                          <p className="font-bold text-secondary shrink-0">₹{l.price_per_kg}/{l.unit || "kg"}</p>
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                          <span className="flex items-center gap-1"><Package className="h-3 w-3" />{t("dashboard.kgLeft", { n: l.kg })}</span>
-                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{t("dashboard.views", { n: l.views })}</span>
+                          <span className="flex items-center gap-1"><Package className="h-3 w-3" />{l.stock_kg} {l.unit || "kg"} left</span>
+                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{l.views || 0}</span>
                         </div>
-                        <Button variant="outline" className="w-full h-8 text-xs">{t("dashboard.edit")}</Button>
+                        <Button onClick={() => deleteListing(l.id)} variant="outline" className="w-full h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
+                          <Trash2 className="h-3 w-3 mr-1.5" />Remove
+                        </Button>
                       </div>
                     </motion.div>
                   ))}
                 </div>
-              </div>
-
-              {/* Inquiries */}
-              <div className="rounded-2xl bg-card border border-border p-5 shadow-soft">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-display font-bold">{t("dashboard.recentInquiries")}</h3>
-                  <span className="h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">3</span>
-                </div>
-                <div className="space-y-3">
-                  {inquiries.map((q, i) => (
-                    <motion.div key={q.name} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }} className="flex items-start gap-3">
-                      <div className={`shrink-0 h-9 w-9 rounded-full ${q.color} text-white font-bold flex items-center justify-center text-sm`}>{q.name[0]}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold truncate">{q.name}</p>
-                          <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{q.time}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{q.msg}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-                <button className="text-sm text-secondary font-semibold mt-4 hover:underline">{t("dashboard.viewMessages")}</button>
-              </div>
+              )}
             </div>
 
-            {/* Orders table */}
+            {/* Orders */}
             <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden">
               <div className="p-5 flex items-center justify-between">
                 <div>
@@ -150,25 +192,25 @@ const Dashboard = () => {
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
-                      {[t("dashboard.orderId"), t("dashboard.crop"), t("dashboard.buyer"), t("dashboard.quantity"), t("dashboard.amount"), t("dashboard.status"), t("dashboard.action")].map((h) => (
+                      {[t("dashboard.orderId"), t("dashboard.buyer"), "Date", t("dashboard.amount"), t("dashboard.status")].map((h) => (
                         <th key={h} className="text-left p-4 font-semibold">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((o) => (
+                    {orders.length === 0 ? (
+                      <tr><td colSpan={5} className="p-8 text-center text-muted-foreground text-sm">No orders yet — your sales will appear here.</td></tr>
+                    ) : orders.map((o) => (
                       <tr key={o.id} className="border-t border-border">
-                        <td className="p-4 font-mono text-xs">{o.id}</td>
-                        <td className="p-4">{o.crop}</td>
-                        <td className="p-4">{o.buyer}</td>
-                        <td className="p-4">{o.qty}</td>
-                        <td className="p-4 font-semibold flex items-center gap-1"><IndianRupee className="h-3 w-3" />{o.amt}</td>
+                        <td className="p-4 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
+                        <td className="p-4">{o.delivery_name || "—"}</td>
+                        <td className="p-4 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 font-semibold flex items-center gap-1"><IndianRupee className="h-3 w-3" />{Number(o.total_amount).toLocaleString("en-IN")}</td>
                         <td className="p-4">
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${o.status === "completed" ? "bg-secondary/10 text-secondary" : "bg-amber-500/10 text-amber-700 dark:text-amber-400"}`}>
-                            {o.status === "completed" ? t("dashboard.completed") : t("dashboard.processing")}
+                            {o.status}
                           </span>
                         </td>
-                        <td className="p-4"><button className="text-primary text-sm font-semibold hover:underline">{t("dashboard.details")}</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -178,6 +220,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <PostCropDialog open={postOpen} onOpenChange={setPostOpen} onCreated={load} />
     </Layout>
   );
 };
