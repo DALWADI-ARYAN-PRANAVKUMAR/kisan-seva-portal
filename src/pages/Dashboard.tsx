@@ -23,7 +23,7 @@ type TabKey = "dashboard" | "orders" | "listings" | "earnings" | "analytics";
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
