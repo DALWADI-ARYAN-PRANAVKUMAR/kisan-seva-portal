@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor, CheckCircle2, PartyPopper } from "lucide-react";
+import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor, CheckCircle2, PartyPopper, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const STATES = ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Haryana", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Punjab", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"];
+type PlacedOrder = { id: string; total: number; syncing: boolean; error?: string };
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ const Checkout = () => {
   const [form, setForm] = useState({ name: "", phone: "", pin: "", flat: "", area: "", city: "", state: "" });
   const [payment, setPayment] = useState<"upi" | "cod" | "card">("upi");
   const [submitting, setSubmitting] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState<{ id: string; total: number } | null>(null);
+  const [orderPlaced, setOrderPlaced] = useState<PlacedOrder | null>(null);
 
   const transport = items.length ? 150 : 0;
   const subsidy = items.length ? 50 : 0;
@@ -43,26 +44,31 @@ const Checkout = () => {
       toast.error("Please fill all delivery fields");
       return;
     }
+    const orderId = crypto.randomUUID();
     setSubmitting(true);
-    const { data: order, error } = await supabase.from("orders").insert({
+    setOrderPlaced({ id: orderId, total, syncing: true });
+
+    const { error } = await supabase.from("orders").insert({
+      id: orderId,
       buyer_id: user.id,
       total_amount: total,
       delivery_name: form.name,
       delivery_phone: form.phone,
       delivery_address: `${form.flat}, ${form.area}, ${form.city}, ${form.state} - ${form.pin}`,
       payment_method: payment,
-    }).select().single();
+    });
 
-    if (error || !order) {
+    if (error) {
       console.error("Order insert failed:", error);
-      toast.error(error?.message || "Order failed");
+      setOrderPlaced({ id: orderId, total, syncing: false, error: error.message || "Order failed" });
+      toast.error(error.message || "Order failed");
       setSubmitting(false);
       return;
     }
 
     const { error: itemErr } = await supabase.from("order_items").insert(
       items.map((i) => ({
-        order_id: order.id,
+        order_id: orderId,
         listing_id: i.listing_id,
         title: i.title,
         quantity_kg: Math.max(1, Math.round(i.quantity)),
@@ -72,13 +78,14 @@ const Checkout = () => {
     );
     if (itemErr) {
       console.error("Order items insert failed:", itemErr);
+      setOrderPlaced({ id: orderId, total, syncing: false, error: itemErr.message });
       toast.error(itemErr.message);
       setSubmitting(false);
       return;
     }
 
     toast.success(t("checkout.success"));
-    setOrderPlaced({ id: order.id, total: total });
+    setOrderPlaced({ id: orderId, total, syncing: false });
     clear();
     setSubmitting(false);
     setTimeout(() => navigate("/dashboard"), 5000);
