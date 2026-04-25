@@ -14,7 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      listings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          distance_km: number | null
+          id: string
+          image_url: string | null
+          location: string | null
+          min_order_kg: number
+          price_per_kg: number
+          rating: number | null
+          seller_id: string | null
+          status: string
+          stock_kg: number
+          title: string
+          views: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          distance_km?: number | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          min_order_kg?: number
+          price_per_kg: number
+          rating?: number | null
+          seller_id?: string | null
+          status?: string
+          stock_kg?: number
+          title: string
+          views?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          distance_km?: number | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          min_order_kg?: number
+          price_per_kg?: number
+          rating?: number | null
+          seller_id?: string | null
+          status?: string
+          stock_kg?: number
+          title?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          id: string
+          listing_id: string | null
+          order_id: string
+          price_per_kg: number
+          quantity_kg: number
+          subtotal: number
+          title: string
+        }
+        Insert: {
+          id?: string
+          listing_id?: string | null
+          order_id: string
+          price_per_kg: number
+          quantity_kg: number
+          subtotal: number
+          title: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string | null
+          order_id?: string
+          price_per_kg?: number
+          quantity_kg?: number
+          subtotal?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          delivery_address: string | null
+          delivery_name: string | null
+          delivery_phone: string | null
+          id: string
+          payment_method: string | null
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          delivery_address?: string | null
+          delivery_name?: string | null
+          delivery_phone?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string
+          total_amount: number
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          delivery_address?: string | null
+          delivery_name?: string | null
+          delivery_phone?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string
+          total_amount?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          location: string | null
+          phone: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          location?: string | null
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
