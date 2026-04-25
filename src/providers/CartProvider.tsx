@@ -6,6 +6,7 @@ export type CartItem = {
   price_per_kg: number;
   image_url: string | null;
   seller_name: string;
+  unit: string;
   quantity: number;
 };
 
