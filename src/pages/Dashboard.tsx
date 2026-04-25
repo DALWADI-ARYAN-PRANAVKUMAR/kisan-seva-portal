@@ -23,7 +23,7 @@ type TabKey = "dashboard" | "orders" | "listings" | "earnings" | "analytics";
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -167,6 +167,56 @@ const Dashboard = () => {
       </div>
     </div>
   );
+
+  // LOGGED-OUT GATE — show sidebar shell but no info; prompt to sign in
+  if (!authLoading && !user) {
+    const lockedNav: { icon: typeof Wallet; key: TabKey }[] = [
+      { icon: LayoutGrid, key: "dashboard" },
+      { icon: History, key: "orders" },
+      { icon: Tractor, key: "listings" },
+      { icon: Wallet, key: "earnings" },
+      { icon: BarChart3, key: "analytics" },
+    ];
+    return (
+      <Layout>
+        <div className="container py-8">
+          <div className="grid lg:grid-cols-[260px_1fr] gap-6">
+            <aside className="rounded-2xl bg-card border border-border p-4 h-fit shadow-soft lg:sticky lg:top-20 opacity-90">
+              <div className="flex items-center gap-3 px-2 pb-4 mb-3 border-b border-border">
+                <div className="h-11 w-11 rounded-full bg-muted flex items-center justify-center text-muted-foreground"><Tractor className="h-5 w-5" /></div>
+                <div className="min-w-0">
+                  <p className="font-display font-bold text-muted-foreground truncate">Guest</p>
+                  <p className="text-xs text-muted-foreground">Not signed in</p>
+                </div>
+              </div>
+              <nav className="space-y-1">
+                {lockedNav.map((it) => (
+                  <button key={it.key} disabled className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/60 cursor-not-allowed">
+                    <it.icon className="h-4 w-4" />{t(`dashboard.nav.${it.key}`)}
+                  </button>
+                ))}
+              </nav>
+              <Button onClick={() => navigate("/auth")} className="w-full mt-5 bg-primary hover:bg-primary/90 shadow-soft">
+                Sign in to continue
+              </Button>
+            </aside>
+
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border-2 border-dashed border-border p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <ShieldCheck className="h-8 w-8" />
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Please sign in to view your dashboard</h2>
+              <p className="text-sm text-muted-foreground max-w-md mb-6">Your listings, orders, earnings and analytics are private. Sign in with your mobile number to continue.</p>
+              <div className="flex gap-3">
+                <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 shadow-soft">Sign in</Button>
+                <Button onClick={() => navigate("/auth?from=checkout")} variant="outline">Create account</Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // BUYER VIEW — only order history + total spendings
   if (profile?.role === "buyer") {
