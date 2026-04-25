@@ -1,105 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Kisan Seva — Digital Earth design system. All colors HSL. */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 30 33% 98%;          /* #fcf9f8 */
+    --foreground: 0 2% 11%;            /* #1c1b1b */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 2% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 2% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Vibrant Orange — primary CTA (harvest energy) */
+    --primary: 21 89% 54%;             /* #f37021 */
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 23 100% 31%;       /* #a04100 */
+    --primary-soft: 22 100% 90%;       /* #ffdbcb */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Forest Green — secondary anchor */
+    --secondary: 145 100% 21%;         /* #006d31 */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-soft: 137 84% 76%;     /* #8bf6a1 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 24 14% 93%;               /* #ebe7e7 */
+    --muted-foreground: 18 26% 28%;    /* #584237 */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 145 100% 21%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 24 8% 88%;
+    --input: 24 8% 88%;
+    --ring: 21 89% 54%;
 
-    --radius: 0.5rem;
+    --surface-container: 22 19% 93%;   /* #f0edec */
+    --surface-container-low: 24 14% 96%; /* #f6f3f2 */
+    --on-surface-variant: 18 26% 28%;
+    --outline: 18 17% 47%;             /* #8c7166 */
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 0.75rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Brand gradients & shadows */
+    --gradient-hero: linear-gradient(135deg, hsl(21 89% 54%) 0%, hsl(145 100% 21%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(22 100% 90%) 0%, hsl(30 33% 98%) 100%);
+    --gradient-fresh: linear-gradient(135deg, hsl(137 84% 90%) 0%, hsl(145 50% 96%) 100%);
+    --shadow-soft: 0 4px 12px -4px hsl(23 100% 31% / 0.08);
+    --shadow-card: 0 12px 32px -12px hsl(23 100% 31% / 0.18);
+    --shadow-glow: 0 0 40px hsl(21 89% 54% / 0.25);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 24 14% 96%;
+    --sidebar-foreground: 0 2% 11%;
+    --sidebar-primary: 145 100% 21%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 137 84% 90%;
+    --sidebar-accent-foreground: 145 100% 15%;
+    --sidebar-border: 24 8% 88%;
+    --sidebar-ring: 21 89% 54%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 25% 8%;          /* deep charcoal navy */
+    --foreground: 30 20% 96%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 22% 11%;
+    --card-foreground: 30 20% 96%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 22% 11%;
+    --popover-foreground: 30 20% 96%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 21 95% 62%;
+    --primary-foreground: 220 30% 8%;
+    --primary-deep: 21 89% 54%;
+    --primary-soft: 21 60% 22%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 145 65% 50%;
+    --secondary-foreground: 220 30% 8%;
+    --secondary-soft: 145 40% 22%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 30 12% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 145 65% 50%;
+    --accent-foreground: 220 30% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 16% 20%;
+    --input: 220 16% 20%;
+    --ring: 21 95% 62%;
+
+    --surface-container: 220 22% 13%;
+    --surface-container-low: 220 22% 11%;
+    --on-surface-variant: 30 12% 70%;
+    --outline: 220 10% 45%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(21 95% 62%) 0%, hsl(145 65% 35%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(21 60% 22%) 0%, hsl(220 22% 11%) 100%);
+    --gradient-fresh: linear-gradient(135deg, hsl(145 40% 18%) 0%, hsl(220 22% 11%) 100%);
+    --shadow-soft: 0 4px 12px -4px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 12px 32px -12px hsl(0 0% 0% / 0.6);
+    --shadow-glow: 0 0 40px hsl(21 95% 62% / 0.3);
+
+    --sidebar-background: 220 22% 11%;
+    --sidebar-foreground: 30 20% 96%;
+    --sidebar-primary: 145 65% 50%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 145 40% 22%;
+    --sidebar-accent-foreground: 145 65% 80%;
+    --sidebar-border: 220 16% 20%;
+    --sidebar-ring: 21 95% 62%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv02','cv03','cv04','cv11';
   }
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+  }
+  /* Devanagari / Gurmukhi / Tamil fall back automatically via Noto */
+  :lang(hi) { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; line-height: 1.7; }
+  :lang(mr) { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; line-height: 1.7; }
+  :lang(pa) { font-family: 'Noto Sans Gurmukhi', 'Inter', sans-serif; line-height: 1.7; }
+  :lang(ta) { font-family: 'Noto Sans Tamil', 'Inter', sans-serif; line-height: 1.7; }
+}
+
+@layer utilities {
+  .gradient-hero { background: var(--gradient-hero); }
+  .gradient-warm { background: var(--gradient-warm); }
+  .gradient-fresh { background: var(--gradient-fresh); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .text-balance { text-wrap: balance; }
+
+  .story-link {
+    @apply relative inline-block;
+  }
+  .story-link::after {
+    content: '';
+    @apply absolute left-0 -bottom-0.5 h-0.5 w-full bg-primary scale-x-0 origin-bottom-right transition-transform duration-300;
+  }
+  .story-link:hover::after { @apply scale-x-100 origin-bottom-left; }
+
+  .hover-lift {
+    @apply transition-all duration-300;
+    transition-timing-function: var(--transition-smooth);
+  }
+  .hover-lift:hover { @apply -translate-y-1 shadow-card; }
 }
