@@ -133,20 +133,24 @@ const Checkout = () => {
               ))}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="relative">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <PartyPopper className="h-5 w-5 text-primary" />
-                  <span className="text-xs font-semibold tracking-widest uppercase text-secondary">Order Confirmed</span>
-                  <PartyPopper className="h-5 w-5 text-primary" />
+                  {orderPlaced.error ? <AlertCircle className="h-5 w-5 text-destructive" /> : <PartyPopper className="h-5 w-5 text-primary" />}
+                  <span className={`text-xs font-semibold tracking-widest uppercase ${orderPlaced.error ? "text-destructive" : "text-secondary"}`}>
+                    {orderPlaced.error ? "Order Needs Attention" : orderPlaced.syncing ? "Confirming Order" : "Order Confirmed"}
+                  </span>
+                  {orderPlaced.error ? <AlertCircle className="h-5 w-5 text-destructive" /> : <PartyPopper className="h-5 w-5 text-primary" />}
                 </div>
-                <h2 className="font-display text-3xl font-bold mb-2">Order Placed Successfully!</h2>
-                <p className="text-sm text-muted-foreground mb-4">Thank you for supporting our farmers. Your fresh produce is on its way.</p>
+                <h2 className="font-display text-3xl font-bold mb-2">{orderPlaced.error ? "Payment Paused" : "Order Placed Successfully!"}</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {orderPlaced.error ? "We showed this screen instantly, but saving the order failed. Please try again." : orderPlaced.syncing ? "Saving your order with the farmer now…" : "Thank you for supporting our farmers. Your fresh produce is on its way."}
+                </p>
                 <div className="rounded-xl bg-muted/50 border border-border p-4 mb-5 text-left">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1"><span>Order ID</span><span className="font-mono">#{orderPlaced.id.slice(0, 8).toUpperCase()}</span></div>
                   <div className="flex justify-between font-semibold"><span>Total Paid</span><span>₹{orderPlaced.total.toFixed(0)}</span></div>
                 </div>
-                <Button onClick={() => navigate("/dashboard")} className="w-full h-11 bg-primary hover:bg-primary/90">
-                  View My Orders
+                <Button onClick={() => orderPlaced.error ? setOrderPlaced(null) : navigate("/dashboard")} className="w-full h-11 bg-primary hover:bg-primary/90" disabled={orderPlaced.syncing}>
+                  {orderPlaced.error ? "Try Again" : orderPlaced.syncing ? "Saving…" : "View My Orders"}
                 </Button>
-                <p className="text-[11px] text-muted-foreground mt-3">Redirecting in a moment…</p>
+                {!orderPlaced.error && !orderPlaced.syncing && <p className="text-[11px] text-muted-foreground mt-3">Redirecting in a moment…</p>}
               </motion.div>
             </motion.div>
           </motion.div>
