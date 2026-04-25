@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor, CheckCircle2, PartyPopper } from "lucide-react";
+import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor, CheckCircle2, PartyPopper, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const STATES = ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Haryana", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Punjab", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"];
+type PlacedOrder = { id: string; total: number; syncing: boolean; error?: string };
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ const Checkout = () => {
   const [form, setForm] = useState({ name: "", phone: "", pin: "", flat: "", area: "", city: "", state: "" });
   const [payment, setPayment] = useState<"upi" | "cod" | "card">("upi");
   const [submitting, setSubmitting] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState<{ id: string; total: number } | null>(null);
+  const [orderPlaced, setOrderPlaced] = useState<PlacedOrder | null>(null);
 
   const transport = items.length ? 150 : 0;
   const subsidy = items.length ? 50 : 0;
@@ -43,26 +44,31 @@ const Checkout = () => {
       toast.error("Please fill all delivery fields");
       return;
     }
+    const orderId = crypto.randomUUID();
     setSubmitting(true);
-    const { data: order, error } = await supabase.from("orders").insert({
+    setOrderPlaced({ id: orderId, total, syncing: true });
+
+    const { error } = await supabase.from("orders").insert({
+      id: orderId,
       buyer_id: user.id,
       total_amount: total,
       delivery_name: form.name,
       delivery_phone: form.phone,
       delivery_address: `${form.flat}, ${form.area}, ${form.city}, ${form.state} - ${form.pin}`,
       payment_method: payment,
-    }).select().single();
+    });
 
-    if (error || !order) {
+    if (error) {
       console.error("Order insert failed:", error);
-      toast.error(error?.message || "Order failed");
+      setOrderPlaced({ id: orderId, total, syncing: false, error: error.message || "Order failed" });
+      toast.error(error.message || "Order failed");
       setSubmitting(false);
       return;
     }
 
     const { error: itemErr } = await supabase.from("order_items").insert(
       items.map((i) => ({
-        order_id: order.id,
+        order_id: orderId,
         listing_id: i.listing_id,
         title: i.title,
         quantity_kg: Math.max(1, Math.round(i.quantity)),
@@ -72,13 +78,14 @@ const Checkout = () => {
     );
     if (itemErr) {
       console.error("Order items insert failed:", itemErr);
+      setOrderPlaced({ id: orderId, total, syncing: false, error: itemErr.message });
       toast.error(itemErr.message);
       setSubmitting(false);
       return;
     }
 
     toast.success(t("checkout.success"));
-    setOrderPlaced({ id: order.id, total: total });
+    setOrderPlaced({ id: orderId, total, syncing: false });
     clear();
     setSubmitting(false);
     setTimeout(() => navigate("/dashboard"), 5000);
@@ -126,20 +133,24 @@ const Checkout = () => {
               ))}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="relative">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <PartyPopper className="h-5 w-5 text-primary" />
-                  <span className="text-xs font-semibold tracking-widest uppercase text-secondary">Order Confirmed</span>
-                  <PartyPopper className="h-5 w-5 text-primary" />
+                  {orderPlaced.error ? <AlertCircle className="h-5 w-5 text-destructive" /> : <PartyPopper className="h-5 w-5 text-primary" />}
+                  <span className={`text-xs font-semibold tracking-widest uppercase ${orderPlaced.error ? "text-destructive" : "text-secondary"}`}>
+                    {orderPlaced.error ? "Order Needs Attention" : orderPlaced.syncing ? "Confirming Order" : "Order Confirmed"}
+                  </span>
+                  {orderPlaced.error ? <AlertCircle className="h-5 w-5 text-destructive" /> : <PartyPopper className="h-5 w-5 text-primary" />}
                 </div>
-                <h2 className="font-display text-3xl font-bold mb-2">Order Placed Successfully!</h2>
-                <p className="text-sm text-muted-foreground mb-4">Thank you for supporting our farmers. Your fresh produce is on its way.</p>
+                <h2 className="font-display text-3xl font-bold mb-2">{orderPlaced.error ? "Payment Paused" : "Order Placed Successfully!"}</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {orderPlaced.error ? "We showed this screen instantly, but saving the order failed. Please try again." : orderPlaced.syncing ? "Saving your order with the farmer now…" : "Thank you for supporting our farmers. Your fresh produce is on its way."}
+                </p>
                 <div className="rounded-xl bg-muted/50 border border-border p-4 mb-5 text-left">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1"><span>Order ID</span><span className="font-mono">#{orderPlaced.id.slice(0, 8).toUpperCase()}</span></div>
                   <div className="flex justify-between font-semibold"><span>Total Paid</span><span>₹{orderPlaced.total.toFixed(0)}</span></div>
                 </div>
-                <Button onClick={() => navigate("/dashboard")} className="w-full h-11 bg-primary hover:bg-primary/90">
-                  View My Orders
+                <Button onClick={() => orderPlaced.error ? setOrderPlaced(null) : navigate("/dashboard")} className="w-full h-11 bg-primary hover:bg-primary/90" disabled={orderPlaced.syncing}>
+                  {orderPlaced.error ? "Try Again" : orderPlaced.syncing ? "Saving…" : "View My Orders"}
                 </Button>
-                <p className="text-[11px] text-muted-foreground mt-3">Redirecting in a moment…</p>
+                {!orderPlaced.error && !orderPlaced.syncing && <p className="text-[11px] text-muted-foreground mt-3">Redirecting in a moment…</p>}
               </motion.div>
             </motion.div>
           </motion.div>
