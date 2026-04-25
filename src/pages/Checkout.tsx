@@ -81,7 +81,7 @@ const Checkout = () => {
     setOrderPlaced({ id: order.id, total: total });
     clear();
     setSubmitting(false);
-    setTimeout(() => navigate("/dashboard"), 3200);
+    setTimeout(() => navigate("/dashboard"), 5000);
   };
 
   return (
