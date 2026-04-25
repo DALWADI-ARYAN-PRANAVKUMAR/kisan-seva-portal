@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor } from "lucide-react";
+import { ArrowLeft, Lock, Truck, Wallet, QrCode, Banknote, CreditCard, Plus, Minus, ShieldCheck, BadgeCheck, Tractor, CheckCircle2, PartyPopper } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ const Checkout = () => {
   const [form, setForm] = useState({ name: "", phone: "", pin: "", flat: "", area: "", city: "", state: "" });
   const [payment, setPayment] = useState<"upi" | "cod" | "card">("upi");
   const [submitting, setSubmitting] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState<{ id: string; total: number } | null>(null);
 
   const transport = items.length ? 150 : 0;
   const subsidy = items.length ? 50 : 0;
