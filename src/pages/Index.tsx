@@ -23,7 +23,7 @@ const Index = () => {
           <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7 }} className="flex justify-center mb-8">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-primary/30 blur-3xl scale-110" />
-              <img src={logo} alt="Kisan Seva" className="relative h-44 w-44 md:h-56 md:w-56 lg:h-64 lg:w-64 animate-float drop-shadow-2xl" />
+              <img src={logo} alt="Kisan Seva" className="relative h-80 w-80 md:h-[28rem] md:w-[28rem] lg:h-[32rem] lg:w-[32rem] animate-float drop-shadow-2xl" />
             </div>
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-center text-secondary font-semibold tracking-widest text-xs uppercase mb-3">
