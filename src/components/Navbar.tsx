@@ -21,8 +21,6 @@ export const Navbar = () => {
   const links = [
     { to: "/marketplace", label: t("nav.marketplace") },
     { to: "/dashboard", label: t("nav.dashboard") },
-    { to: "/#community", label: t("nav.community") },
-    { to: "/#about", label: t("nav.about") },
   ];
 
   return (
@@ -33,9 +31,9 @@ export const Navbar = () => {
       className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border"
     >
       <div className="container flex items-center justify-between h-16 gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Kisan Seva" className="h-9 w-9 rounded-full object-contain" />
-          <span className="font-display font-bold text-lg hidden sm:inline">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <img src={logo} alt="Kisan Seva" className="h-12 w-12 md:h-14 md:w-14 rounded-full object-contain drop-shadow-md" />
+          <span className="font-display font-bold text-xl md:text-2xl hidden sm:inline">
             <span className="text-primary">Kisan</span> <span className="text-secondary">Seva</span>
           </span>
         </Link>

@@ -30,6 +30,7 @@ export type Database = {
           status: string
           stock_kg: number
           title: string
+          unit: string
           views: number | null
         }
         Insert: {
@@ -47,6 +48,7 @@ export type Database = {
           status?: string
           stock_kg?: number
           title: string
+          unit?: string
           views?: number | null
         }
         Update: {
@@ -64,6 +66,7 @@ export type Database = {
           status?: string
           stock_kg?: number
           title?: string
+          unit?: string
           views?: number | null
         }
         Relationships: []
