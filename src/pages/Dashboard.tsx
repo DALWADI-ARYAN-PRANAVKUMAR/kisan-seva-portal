@@ -168,8 +168,67 @@ const Dashboard = () => {
     </div>
   );
 
+  // BUYER VIEW — only order history + total spendings
+  if (profile?.role === "buyer") {
+    const totalSpent = orders.reduce((s, o) => s + Number(o.total_amount), 0);
+    return (
+      <Layout>
+        <div className="container py-10 max-w-5xl">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                <ShoppingBasket className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="font-display text-3xl md:text-4xl font-bold">My Account</h1>
+                <p className="text-sm text-muted-foreground">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}!</p>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 mt-8">
+              <div className="rounded-2xl bg-gradient-to-br from-secondary/15 to-secondary/5 border border-secondary/20 p-6 shadow-soft">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-9 w-9 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary"><Wallet className="h-5 w-5" /></div>
+                  <span className="font-semibold">Total Spendings</span>
+                </div>
+                <p className="font-display text-4xl font-bold text-secondary">₹{totalSpent.toLocaleString("en-IN")}</p>
+                <p className="text-xs text-muted-foreground mt-1">Across {orders.length} {orders.length === 1 ? "order" : "orders"}</p>
+              </div>
+              <div className="rounded-2xl bg-card border border-border p-6 shadow-soft">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Receipt className="h-5 w-5" /></div>
+                  <span className="font-semibold">Orders Placed</span>
+                </div>
+                <p className="font-display text-4xl font-bold">{orders.length}</p>
+                <p className="text-xs text-muted-foreground mt-1">Direct from verified farmers</p>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <div className="flex items-center gap-2 mb-4">
+                <History className="h-5 w-5 text-secondary" />
+                <h2 className="font-display text-2xl font-bold">Order History</h2>
+              </div>
+              {loading ? (
+                <div className="rounded-2xl bg-muted h-72 animate-pulse" />
+              ) : orders.length === 0 ? (
+                <div className="rounded-2xl border-2 border-dashed border-border p-12 text-center">
+                  <ShoppingBasket className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
+                  <p className="font-semibold mb-1">No orders yet</p>
+                  <p className="text-sm text-muted-foreground mb-4">Browse the marketplace to place your first order.</p>
+                  <Button onClick={() => navigate("/marketplace")} className="bg-primary hover:bg-primary/90">Go to Marketplace</Button>
+                </div>
+              ) : (
+                <OrdersTable items={orders} />
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout>
       <div className="container py-8">
         <div className="grid lg:grid-cols-[260px_1fr] gap-6">
           {/* Sidebar */}
