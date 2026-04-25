@@ -68,9 +68,10 @@ const Checkout = () => {
     if (itemErr) { toast.error(itemErr.message); setSubmitting(false); return; }
 
     toast.success(t("checkout.success"));
+    setOrderPlaced({ id: order.id, total: total });
     clear();
     setSubmitting(false);
-    navigate("/dashboard");
+    setTimeout(() => navigate("/dashboard"), 3200);
   };
 
   return (
