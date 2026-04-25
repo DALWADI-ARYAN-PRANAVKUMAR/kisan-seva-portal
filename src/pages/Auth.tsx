@@ -5,15 +5,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShoppingBasket, Tractor, Phone, KeyRound, ArrowLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingBasket, Tractor, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { LANGUAGES } from "@/i18n";
 import { Globe, Moon, Sun } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/providers/ThemeProvider";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+// Phone + password auth. Supabase auth requires an email, so we synthesize a
+// stable pseudo-email from the normalized phone number. The real phone is also
+// stored on the user metadata + profile so the rest of the app keeps working.
+const phoneToEmail = (e164: string) => `${e164.replace(/\D/g, "")}@phone.kisanseva.app`;
+
+const normalizePhone = (raw: string) => {
+  const digits = raw.replace(/\D/g, "");
+  if (raw.trim().startsWith("+")) return "+" + digits;
+  if (digits.length === 10) return "+91" + digits;
+  if (digits.length === 12 && digits.startsWith("91")) return "+" + digits;
+  return "+" + digits;
+};
 
 const Auth = () => {
   const { t, i18n } = useTranslation();
@@ -24,58 +36,48 @@ const Auth = () => {
 
   const [tab, setTab] = useState<"signin" | "signup">(fromCheckout ? "signup" : "signin");
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
-  const [step, setStep] = useState<"phone" | "otp">("phone");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Normalize Indian numbers to E.164 (+91...)
-  const normalizePhone = (raw: string) => {
-    const digits = raw.replace(/\D/g, "");
-    if (raw.trim().startsWith("+")) return "+" + digits;
-    if (digits.length === 10) return "+91" + digits;
-    if (digits.length === 12 && digits.startsWith("91")) return "+" + digits;
-    return "+" + digits;
-  };
-
-  const sendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (tab === "signup" && !fullName.trim()) { toast.error("Please enter your full name"); return; }
-    setLoading(true);
-    const e164 = normalizePhone(phone);
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: e164,
-      options: {
-        // Pass profile metadata so handle_new_user trigger creates the right profile on first sign-in
-        data: tab === "signup" ? { full_name: fullName, role, phone: e164 } : undefined,
-      },
-    });
-    setLoading(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("OTP sent to " + e164);
-    setStep("otp");
-  };
-
-  const verifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length !== 6) { toast.error("Enter the 6-digit code"); return; }
-    setLoading(true);
-    const e164 = normalizePhone(phone);
-    const { error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" });
-    setLoading(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success(tab === "signup" ? t("auth.signedUp") : t("auth.signedIn"));
+  const afterAuth = () => {
     const next = sessionStorage.getItem("ks_post_auth");
-    if (next) { sessionStorage.removeItem("ks_post_auth"); navigate(next); }
-    else navigate(role === "seller" && tab === "signup" ? "/dashboard" : "/marketplace");
+    if (next) { sessionStorage.removeItem("ks_post_auth"); navigate(next); return; }
+    navigate(role === "seller" && tab === "signup" ? "/dashboard" : "/marketplace");
   };
 
-  const resendOtp = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone.trim()) { toast.error("Enter your mobile number"); return; }
+    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    if (tab === "signup" && !fullName.trim()) { toast.error("Please enter your full name"); return; }
+
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone: normalizePhone(phone) });
-    setLoading(false);
-    if (error) toast.error(error.message); else toast.success("New code sent");
+    const e164 = normalizePhone(phone);
+    const email = phoneToEmail(e164);
+
+    if (tab === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName, role, phone: e164 },
+        },
+      });
+      setLoading(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Account created! You're signed in.");
+      afterAuth();
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (error) { toast.error("Invalid mobile number or password"); return; }
+      toast.success(t("auth.signedIn"));
+      afterAuth();
+    }
   };
 
   const handleGoogle = async () => {
@@ -83,10 +85,6 @@ const Auth = () => {
       provider: "google",
       options: { redirectTo: `${window.location.origin}/` },
     });
-  };
-
-  const switchTab = (k: "signin" | "signup") => {
-    setTab(k); setStep("phone"); setOtp("");
   };
 
   return (
@@ -120,77 +118,61 @@ const Auth = () => {
         <div className="flex-1 flex items-center justify-center p-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
             <h2 className="font-display text-3xl font-bold">{fromCheckout ? t("auth.welcomeCheckout") : t("auth.welcome")}</h2>
-            <p className="text-muted-foreground text-sm mt-2">Sign in instantly with your mobile number — no passwords needed.</p>
+            <p className="text-muted-foreground text-sm mt-2">Sign in with your mobile number and password.</p>
 
             <div className="grid grid-cols-2 mt-6 border-b border-border">
               {(["signin", "signup"] as const).map((k) => (
-                <button key={k} onClick={() => switchTab(k)} className={`pb-3 font-semibold text-sm border-b-2 transition-colors ${tab === k ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
+                <button key={k} onClick={() => setTab(k)} className={`pb-3 font-semibold text-sm border-b-2 transition-colors ${tab === k ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
                   {k === "signin" ? t("auth.signin") : t("auth.create")}
                 </button>
               ))}
             </div>
 
-            <AnimatePresence mode="wait">
-              {step === "phone" ? (
-                <motion.form key="phone" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={sendOtp} className="mt-6 space-y-4">
-                  {tab === "signup" && (
-                    <>
-                      <div>
-                        <p className="text-sm font-semibold mb-2">{t("auth.iam")}</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          {(["buyer", "seller"] as const).map((r) => (
-                            <button key={r} type="button" onClick={() => setRole(r)} className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all ${role === r ? (r === "buyer" ? "border-secondary bg-secondary/10 text-secondary" : "border-primary bg-primary/10 text-primary") : "border-border"}`}>
-                              {r === "buyer" ? <ShoppingBasket className="h-5 w-5" /> : <Tractor className="h-5 w-5" />}
-                              <span className="text-sm font-semibold">{t(`auth.${r}`)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <Label>{t("auth.fullName")}</Label>
-                        <Input className="mt-1.5" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Rajesh Kumar" />
-                      </div>
-                    </>
-                  )}
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {tab === "signup" && (
+                <>
                   <div>
-                    <Label>Mobile Number</Label>
-                    <div className="relative mt-1.5">
-                      <Phone className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input className="pl-9" type="tel" required placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1.5">We'll send a 6-digit OTP. Indian numbers default to +91.</p>
-                  </div>
-
-                  <Button type="submit" disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90 shadow-soft">
-                    {loading ? "Sending..." : "Send OTP"} →
-                  </Button>
-                </motion.form>
-              ) : (
-                <motion.form key="otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={verifyOtp} className="mt-6 space-y-5">
-                  <button type="button" onClick={() => { setStep("phone"); setOtp(""); }} className="text-xs text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
-                    <ArrowLeft className="h-3 w-3" /> Change number
-                  </button>
-                  <div>
-                    <Label className="flex items-center gap-2"><KeyRound className="h-4 w-4" />Enter 6-digit OTP</Label>
-                    <p className="text-xs text-muted-foreground mt-1">Sent to {normalizePhone(phone)}</p>
-                    <div className="mt-3 flex justify-center">
-                      <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                        <InputOTPGroup>
-                          {[0,1,2,3,4,5].map((i) => <InputOTPSlot key={i} index={i} className="h-12 w-12 text-lg" />)}
-                        </InputOTPGroup>
-                      </InputOTP>
+                    <p className="text-sm font-semibold mb-2">{t("auth.iam")}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(["buyer", "seller"] as const).map((r) => (
+                        <button key={r} type="button" onClick={() => setRole(r)} className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all ${role === r ? (r === "buyer" ? "border-secondary bg-secondary/10 text-secondary" : "border-primary bg-primary/10 text-primary") : "border-border"}`}>
+                          {r === "buyer" ? <ShoppingBasket className="h-5 w-5" /> : <Tractor className="h-5 w-5" />}
+                          <span className="text-sm font-semibold">{t(`auth.${r}`)}</span>
+                        </button>
+                      ))}
                     </div>
                   </div>
-
-                  <Button type="submit" disabled={loading || otp.length !== 6} className="w-full h-11 bg-primary hover:bg-primary/90 shadow-soft">
-                    {loading ? "Verifying..." : "Verify & Continue"} →
-                  </Button>
-                  <button type="button" onClick={resendOtp} disabled={loading} className="w-full text-xs text-secondary hover:underline">
-                    Didn't receive it? Resend OTP
-                  </button>
-                </motion.form>
+                  <div>
+                    <Label>{t("auth.fullName")}</Label>
+                    <Input className="mt-1.5" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Rajesh Kumar" />
+                  </div>
+                </>
               )}
-            </AnimatePresence>
+
+              <div>
+                <Label>Mobile Number</Label>
+                <div className="relative mt-1.5">
+                  <Phone className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input className="pl-9" type="tel" required placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1.5">Indian numbers default to +91.</p>
+              </div>
+
+              <div>
+                <Label>Password</Label>
+                <div className="relative mt-1.5">
+                  <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input className="pl-9 pr-10" type={showPwd ? "text" : "password"} required minLength={6} placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90 shadow-soft">
+                {loading ? "Please wait..." : tab === "signin" ? "Sign In" : "Create Account"} →
+              </Button>
+            </form>
 
             <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
               <div className="h-px flex-1 bg-border" />{t("auth.or")}<div className="h-px flex-1 bg-border" />
