@@ -229,6 +229,7 @@ const Dashboard = () => {
   }
 
   return (
+    <Layout>
       <div className="container py-8">
         <div className="grid lg:grid-cols-[260px_1fr] gap-6">
           {/* Sidebar */}
