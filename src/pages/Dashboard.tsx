@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Wallet, Package, Star, Plus, LayoutGrid, History, Tractor, BarChart3, IndianRupee, Eye, Trash2, ShieldCheck } from "lucide-react";
+import { Wallet, Package, Star, Plus, LayoutGrid, History, Tractor, BarChart3, IndianRupee, Eye, Trash2, ShieldCheck, ShoppingBasket, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
