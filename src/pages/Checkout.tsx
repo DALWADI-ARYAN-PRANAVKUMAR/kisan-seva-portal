@@ -53,25 +53,35 @@ const Checkout = () => {
       payment_method: payment,
     }).select().single();
 
-    if (error || !order) { toast.error(error?.message || "Order failed"); setSubmitting(false); return; }
+    if (error || !order) {
+      console.error("Order insert failed:", error);
+      toast.error(error?.message || "Order failed");
+      setSubmitting(false);
+      return;
+    }
 
     const { error: itemErr } = await supabase.from("order_items").insert(
       items.map((i) => ({
         order_id: order.id,
         listing_id: i.listing_id,
         title: i.title,
-        quantity_kg: i.quantity,
+        quantity_kg: Math.max(1, Math.round(i.quantity)),
         price_per_kg: i.price_per_kg,
         subtotal: i.quantity * i.price_per_kg,
       }))
     );
-    if (itemErr) { toast.error(itemErr.message); setSubmitting(false); return; }
+    if (itemErr) {
+      console.error("Order items insert failed:", itemErr);
+      toast.error(itemErr.message);
+      setSubmitting(false);
+      return;
+    }
 
     toast.success(t("checkout.success"));
     setOrderPlaced({ id: order.id, total: total });
     clear();
     setSubmitting(false);
-    setTimeout(() => navigate("/dashboard"), 3200);
+    setTimeout(() => navigate("/dashboard"), 5000);
   };
 
   return (
