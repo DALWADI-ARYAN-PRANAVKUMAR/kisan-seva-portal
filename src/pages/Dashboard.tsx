@@ -45,6 +45,18 @@ const Dashboard = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Realtime: refresh when any order/order_item changes (RLS filters to this seller)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("seller-orders-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings", filter: `seller_id=eq.${user.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
   const totalSales = orders.filter((o) => o.status === "completed").reduce((s, o) => s + Number(o.total_amount), 0);
   const pendingSales = orders.filter((o) => o.status !== "completed").reduce((s, o) => s + Number(o.total_amount), 0);
   const totalStock = listings.reduce((s, l) => s + (l.stock_kg || 0), 0);
