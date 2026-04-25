@@ -188,7 +188,7 @@ const Checkout = () => {
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center border border-border rounded-md">
                             <button onClick={() => i.quantity > 1 ? setQty(i.listing_id, i.quantity - 1) : remove(i.listing_id)} className="px-2 py-1 hover:bg-muted"><Minus className="h-3 w-3" /></button>
-                            <span className="px-2 text-sm font-semibold min-w-[2rem] text-center">{i.quantity}</span>
+                            <span className="px-2 text-sm font-semibold min-w-[3rem] text-center">{i.quantity} {i.unit || "kg"}</span>
                             <button onClick={() => setQty(i.listing_id, i.quantity + 1)} className="px-2 py-1 hover:bg-muted"><Plus className="h-3 w-3" /></button>
                           </div>
                           <p className="text-sm font-bold">₹{(i.quantity * i.price_per_kg).toFixed(0)}</p>
