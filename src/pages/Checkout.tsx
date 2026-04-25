@@ -76,6 +76,66 @@ const Checkout = () => {
 
   return (
     <Layout hideFooter>
+      <AnimatePresence>
+        {orderPlaced && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 220, damping: 18 }}
+              className="relative rounded-3xl bg-card border border-border shadow-glow p-10 max-w-md mx-4 text-center overflow-hidden"
+            >
+              <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-secondary/30 blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-primary/30 blur-3xl" />
+              <motion.div
+                initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 260 }}
+                className="relative mx-auto h-24 w-24 rounded-full bg-secondary/15 flex items-center justify-center mb-5"
+              >
+                <motion.div
+                  initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ delay: 0.3, duration: 0.6 }}
+                  className="absolute inset-0 rounded-full border-4 border-secondary/40"
+                />
+                <CheckCircle2 className="h-14 w-14 text-secondary" strokeWidth={2.2} />
+              </motion.div>
+              {[...Array(12)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0.6],
+                    x: Math.cos((i / 12) * Math.PI * 2) * 140,
+                    y: Math.sin((i / 12) * Math.PI * 2) * 140,
+                  }}
+                  transition={{ delay: 0.45, duration: 1.2, ease: "easeOut" }}
+                  className={`absolute top-1/2 left-1/2 h-2 w-2 rounded-full ${i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-secondary" : "bg-amber-500"}`}
+                />
+              ))}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="relative">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <PartyPopper className="h-5 w-5 text-primary" />
+                  <span className="text-xs font-semibold tracking-widest uppercase text-secondary">Order Confirmed</span>
+                  <PartyPopper className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="font-display text-3xl font-bold mb-2">Order Placed Successfully!</h2>
+                <p className="text-sm text-muted-foreground mb-4">Thank you for supporting our farmers. Your fresh produce is on its way.</p>
+                <div className="rounded-xl bg-muted/50 border border-border p-4 mb-5 text-left">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1"><span>Order ID</span><span className="font-mono">#{orderPlaced.id.slice(0, 8).toUpperCase()}</span></div>
+                  <div className="flex justify-between font-semibold"><span>Total Paid</span><span>₹{orderPlaced.total.toFixed(0)}</span></div>
+                </div>
+                <Button onClick={() => navigate("/dashboard")} className="w-full h-11 bg-primary hover:bg-primary/90">
+                  View My Orders
+                </Button>
+                <p className="text-[11px] text-muted-foreground mt-3">Redirecting in a moment…</p>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="border-b border-border bg-card/50 backdrop-blur">
         <div className="container flex items-center justify-between h-14">
           <button onClick={() => navigate("/marketplace")} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
