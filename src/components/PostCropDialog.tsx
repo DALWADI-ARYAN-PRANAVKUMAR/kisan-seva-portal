@@ -205,16 +205,26 @@ export const PostCropDialog = ({ open, onOpenChange, onCreated, listing }: Props
             <p className="text-[11px] text-muted-foreground mt-1">Upload from your device or take a fresh photo with your camera.</p>
 
             {f.image_url ? (
-              <div className="mt-2 relative rounded-xl overflow-hidden border border-border">
-                <img src={f.image_url} alt="Crop preview" className="w-full h-44 object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setF({ ...f, image_url: "" })}
-                  className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
-                  aria-label="Remove image"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+              <div className="mt-2 space-y-2">
+                <div className="relative rounded-xl overflow-hidden border border-border">
+                  <img src={f.image_url} alt="Crop preview" className="w-full h-44 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setF({ ...f, image_url: "" })}
+                    className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
+                    aria-label="Remove image"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-3.5 w-3.5 mr-1.5" /> Replace from device
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => cameraInputRef.current?.click()}>
+                    <Camera className="h-3.5 w-3.5 mr-1.5" /> Retake photo
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="mt-2 grid grid-cols-2 gap-3">
