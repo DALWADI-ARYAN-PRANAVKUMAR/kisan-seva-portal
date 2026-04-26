@@ -33,10 +33,22 @@ const Marketplace = () => {
   const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: "", max: "" });
   const [locationFilter, setLocationFilter] = useState<string>("");
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
+  const [farmerMap, setFarmerMap] = useState<Record<string, string>>({});
+  const [reviewFor, setReviewFor] = useState<Listing | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
 
   useEffect(() => {
-    supabase.from("listings").select("*").order("created_at", { ascending: false }).then(({ data }) => {
-      setListings((data || []) as Listing[]);
+    supabase.from("listings").select("*").order("created_at", { ascending: false }).then(async ({ data }) => {
+      const items = (data || []) as Listing[];
+      setListings(items);
+      const sellerIds = Array.from(new Set(items.map((l) => l.seller_id).filter((x): x is string => !!x)));
+      if (sellerIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", sellerIds);
+        const map: Record<string, string> = {};
+        (profs || []).forEach((p: any) => { if (p.full_name) map[p.id] = p.full_name; });
+        setFarmerMap(map);
+      }
       setLoading(false);
     });
   }, []);
