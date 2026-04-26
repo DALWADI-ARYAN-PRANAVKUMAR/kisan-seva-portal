@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [postOpen, setPostOpen] = useState(false);
+  const [editing, setEditing] = useState<EditableListing | null>(null);
   const [tab, setTab] = useState<TabKey>("dashboard");
 
   const load = useCallback(async () => {
@@ -93,6 +94,17 @@ const Dashboard = () => {
       navigate("/auth?from=dashboard");
       return;
     }
+    setEditing(null);
+    setPostOpen(true);
+  };
+
+  const handleEditClick = (l: Listing) => {
+    setEditing({
+      id: l.id, title: l.title, category: l.category, description: l.description,
+      unit: l.unit, price_per_kg: Number(l.price_per_kg), stock_kg: l.stock_kg,
+      min_order_kg: l.min_order_kg, location: l.location, image_url: l.image_url,
+      status: l.status,
+    });
     setPostOpen(true);
   };
 
@@ -127,6 +139,9 @@ const Dashboard = () => {
                 <span className="flex items-center gap-1"><Package className="h-3 w-3" />{l.stock_kg} {l.unit || "kg"} left</span>
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{l.views || 0}</span>
               </div>
+              <Button onClick={() => handleEditClick(l)} variant="outline" className="w-full h-8 text-xs">
+                <Pencil className="h-3 w-3 mr-1.5" />Edit
+              </Button>
               <Button onClick={() => deleteListing(l.id)} variant="outline" className="w-full h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
                 <Trash2 className="h-3 w-3 mr-1.5" />Remove
               </Button>
