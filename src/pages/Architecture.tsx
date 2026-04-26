@@ -149,7 +149,7 @@ export default function Architecture() {
                     transition={{ delay: i * 0.1 }}
                     className="flex flex-col items-center gap-2"
                   >
-                    <div className={`h-14 w-14 rounded-2xl bg-${s.color}/15 text-${s.color} flex items-center justify-center border-2 border-${s.color}/30`}>
+                    <div className={`h-14 w-14 rounded-2xl ${colorMap[s.color].bg} ${colorMap[s.color].text} flex items-center justify-center border-2 ${colorMap[s.color].borderSoft}`}>
                       <s.icon className="h-6 w-6" />
                     </div>
                     <span className="text-xs font-semibold text-center max-w-[80px]">{s.label}</span>
