@@ -139,12 +139,14 @@ const Dashboard = () => {
                 <span className="flex items-center gap-1"><Package className="h-3 w-3" />{l.stock_kg} {l.unit || "kg"} left</span>
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{l.views || 0}</span>
               </div>
-              <Button onClick={() => handleEditClick(l)} variant="outline" className="w-full h-8 text-xs">
-                <Pencil className="h-3 w-3 mr-1.5" />Edit
-              </Button>
-              <Button onClick={() => deleteListing(l.id)} variant="outline" className="w-full h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
-                <Trash2 className="h-3 w-3 mr-1.5" />Remove
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button onClick={() => handleEditClick(l)} variant="outline" className="h-8 text-xs">
+                  <Pencil className="h-3 w-3 mr-1.5" />Edit
+                </Button>
+                <Button onClick={() => deleteListing(l.id)} variant="outline" className="h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
+                  <Trash2 className="h-3 w-3 mr-1.5" />Remove
+                </Button>
+              </div>
             </div>
           </motion.div>
         ))}
@@ -442,7 +444,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <PostCropDialog open={postOpen} onOpenChange={setPostOpen} onCreated={load} />
+      <PostCropDialog open={postOpen} onOpenChange={(v) => { setPostOpen(v); if (!v) setEditing(null); }} onCreated={load} listing={editing} />
     </Layout>
   );
 };
