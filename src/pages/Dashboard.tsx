@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { PostCropDialog } from "@/components/PostCropDialog";
+import { PostCropDialog, type EditableListing } from "@/components/PostCropDialog";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 type Listing = {
   id: string; title: string; price_per_kg: number; stock_kg: number; views: number | null;
   image_url: string | null; status: string; rating: number | null; unit: string;
+  category: string; description: string | null; min_order_kg: number; location: string | null;
 };
 type Order = {
   id: string; total_amount: number; status: string; created_at: string;
@@ -29,6 +31,7 @@ const Dashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [postOpen, setPostOpen] = useState(false);
+  const [editing, setEditing] = useState<EditableListing | null>(null);
   const [tab, setTab] = useState<TabKey>("dashboard");
 
   const load = useCallback(async () => {
@@ -91,6 +94,17 @@ const Dashboard = () => {
       navigate("/auth?from=dashboard");
       return;
     }
+    setEditing(null);
+    setPostOpen(true);
+  };
+
+  const handleEditClick = (l: Listing) => {
+    setEditing({
+      id: l.id, title: l.title, category: l.category, description: l.description,
+      unit: l.unit, price_per_kg: Number(l.price_per_kg), stock_kg: l.stock_kg,
+      min_order_kg: l.min_order_kg, location: l.location, image_url: l.image_url,
+      status: l.status,
+    });
     setPostOpen(true);
   };
 
@@ -125,9 +139,14 @@ const Dashboard = () => {
                 <span className="flex items-center gap-1"><Package className="h-3 w-3" />{l.stock_kg} {l.unit || "kg"} left</span>
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{l.views || 0}</span>
               </div>
-              <Button onClick={() => deleteListing(l.id)} variant="outline" className="w-full h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
-                <Trash2 className="h-3 w-3 mr-1.5" />Remove
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button onClick={() => handleEditClick(l)} variant="outline" className="h-8 text-xs">
+                  <Pencil className="h-3 w-3 mr-1.5" />Edit
+                </Button>
+                <Button onClick={() => deleteListing(l.id)} variant="outline" className="h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
+                  <Trash2 className="h-3 w-3 mr-1.5" />Remove
+                </Button>
+              </div>
             </div>
           </motion.div>
         ))}
@@ -206,7 +225,7 @@ const Dashboard = () => {
                 <ShieldCheck className="h-8 w-8" />
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Please sign in to view your dashboard</h2>
-              <p className="text-sm text-muted-foreground max-w-md mb-6">Your listings, orders, earnings and analytics are private. Sign in with your mobile number to continue.</p>
+              <p className="text-sm text-muted-foreground max-w-md mb-6">Your listings, orders, earnings and analytics are private. Sign in with your mobile number — we’ll send you a one-time OTP.</p>
               <div className="flex gap-3">
                 <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 shadow-soft">Sign in</Button>
                 <Button onClick={() => navigate("/auth?from=checkout")} variant="outline">Create account</Button>
@@ -425,7 +444,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <PostCropDialog open={postOpen} onOpenChange={setPostOpen} onCreated={load} />
+      <PostCropDialog open={postOpen} onOpenChange={(v) => { setPostOpen(v); if (!v) setEditing(null); }} onCreated={load} listing={editing} />
     </Layout>
   );
 };
