@@ -7,16 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Bell, MapPin, Star, ShoppingCart, BadgeCheck, Clock, Plus, Minus, ShieldCheck } from "lucide-react";
+import { Search, Bell, MapPin, Star, ShoppingCart, BadgeCheck, Clock, Plus, Minus, ShieldCheck, User, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "@/providers/CartProvider";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 type Listing = {
   id: string; title: string; description: string | null; category: string;
   price_per_kg: number; min_order_kg: number; stock_kg: number; location: string | null;
   distance_km: number | null; status: string; image_url: string | null; rating: number | null;
-  unit: string;
+  unit: string; seller_id: string | null;
 };
 
 const Marketplace = () => {
