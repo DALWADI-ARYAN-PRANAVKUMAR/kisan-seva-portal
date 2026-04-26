@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { PostCropDialog } from "@/components/PostCropDialog";
+import { PostCropDialog, type EditableListing } from "@/components/PostCropDialog";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 type Listing = {
   id: string; title: string; price_per_kg: number; stock_kg: number; views: number | null;
   image_url: string | null; status: string; rating: number | null; unit: string;
+  category: string; description: string | null; min_order_kg: number; location: string | null;
 };
 type Order = {
   id: string; total_amount: number; status: string; created_at: string;
