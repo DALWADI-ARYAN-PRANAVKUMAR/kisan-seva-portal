@@ -230,8 +230,12 @@ const Marketplace = () => {
                             <p className="text-[10px] text-muted-foreground">per {unit}</p>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{l.description}</p>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{l.description}</p>
                         <div className="rounded-lg bg-muted/50 p-3 text-xs space-y-1.5 mb-4 mt-auto">
+                          <div className="flex items-center gap-1.5 text-foreground font-medium">
+                            <User className="h-3 w-3 text-primary" />
+                            <span>By {l.seller_id && farmerMap[l.seller_id] ? farmerMap[l.seller_id] : "Verified Farmer"}</span>
+                          </div>
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3" />{l.location}</span>
                             <span className="flex items-center gap-1 text-secondary font-semibold"><Star className="h-3 w-3 fill-current" />{l.rating}</span>
