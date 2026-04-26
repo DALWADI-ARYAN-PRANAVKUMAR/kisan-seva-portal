@@ -145,6 +145,35 @@ const Index = () => {
           ))}
         </div>
       </section>
+
+      {/* FAQ */}
+      <section className="container py-20">
+        <motion.div {...fade} className="text-center mb-10 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wider uppercase mb-3">
+            <HelpCircle className="h-3.5 w-3.5" /> FAQ
+          </div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
+          <p className="text-muted-foreground mt-2">Everything you need to know about Kisan Seva.</p>
+        </motion.div>
+        <motion.div {...fade} className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-3">
+            {[
+              { q: "Who can sell on Kisan Seva?", a: "Any verified farmer or rural producer in India. We personally verify each seller and only AGMARK-certified produce is allowed on the marketplace." },
+              { q: "How is the produce delivered?", a: "Orders are dispatched directly from the farm. Buyers see live order status in their dashboard, and most orders reach the buyer within 24–48 hours." },
+              { q: "Is there a commission or middleman fee?", a: "No middlemen. We charge a tiny platform fee so farmers keep up to 40% more than mandi prices." },
+              { q: "What payment methods are supported?", a: "UPI (Google Pay, PhonePe, Paytm), credit/debit cards (Visa, Mastercard, RuPay) and Cash on Delivery." },
+              { q: "How do I sign in?", a: "Just enter your mobile number and we’ll send you a one-time password (OTP) to log in securely — no need to remember a password." },
+              { q: "Can I edit a listing after posting?", a: "Yes. Open your dashboard → Active Listings → tap Edit to update price, stock, photo or description anytime." },
+              { q: "Is my data safe?", a: "All data is encrypted in transit and at rest. We never share your phone number or personal info with anyone." },
+            ].map((item, i) => (
+              <AccordionItem key={i} value={`item-${i}`} className="rounded-2xl bg-card border border-border px-5 shadow-soft">
+                <AccordionTrigger className="text-left font-semibold hover:no-underline py-4">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4">{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+      </section>
     </Layout>
   );
 };
