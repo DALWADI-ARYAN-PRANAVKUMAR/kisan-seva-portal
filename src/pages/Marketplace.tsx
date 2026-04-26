@@ -29,7 +29,7 @@ const Marketplace = () => {
   const [maxKm, setMaxKm] = useState(100);
   const [sort, setSort] = useState("recommended");
   const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: "", max: "" });
-  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("");
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
