@@ -115,11 +115,26 @@ const Marketplace = () => {
               </div>
             </div>
             <div className="mb-5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Location</p>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="All locations" /></SelectTrigger>
+                <SelectContent className="max-h-64">
+                  <SelectItem value="all">All locations</SelectItem>
+                  {locationOptions.map((loc) => (
+                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {locationOptions.length === 0 && (
+                <p className="text-[10px] text-muted-foreground mt-1.5">No locations yet</p>
+              )}
+            </div>
+            <div className="mb-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("market.distance")}</p>
               <Slider value={[maxKm]} onValueChange={([v]) => setMaxKm(v)} max={200} step={5} />
               <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>0</span><span className="font-semibold text-foreground">{maxKm}km</span><span>200+</span></div>
             </div>
-            <Button variant="outline" className="w-full" onClick={() => { setCats([]); setMaxKm(100); setPriceRange({ min: "", max: "" }); setSearch(""); }}>{t("market.reset")}</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setCats([]); setMaxKm(100); setPriceRange({ min: "", max: "" }); setSearch(""); setLocationFilter("all"); }}>{t("market.reset")}</Button>
           </aside>
 
           {/* grid */}
