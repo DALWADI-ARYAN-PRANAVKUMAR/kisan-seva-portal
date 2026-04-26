@@ -12,6 +12,8 @@ import Marketplace from "./pages/Marketplace";
 import Dashboard from "./pages/Dashboard";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
+import About from "./pages/About";
+import Architecture from "./pages/Architecture";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/architecture" element={<Architecture />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
