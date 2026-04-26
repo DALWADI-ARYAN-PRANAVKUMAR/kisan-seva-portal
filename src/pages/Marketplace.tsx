@@ -271,6 +271,14 @@ const Marketplace = () => {
                         >
                           {l.status === "harvesting_soon" ? t("market.prebook") : (<><ShoppingCart className="h-4 w-4 mr-2" />{t("market.addToCart")} · ₹{(qty * l.price_per_kg).toFixed(0)}</>)}
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setReviewFor(l); setReviewRating(5); setReviewText(""); }}
+                          className="mt-2 text-xs text-muted-foreground hover:text-primary"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Write a review
+                        </Button>
                       </div>
                     </motion.div>
                   );
@@ -279,6 +287,59 @@ const Marketplace = () => {
             )}
           </div>
         </div>
+
+        {/* Review dialog */}
+        <Dialog open={!!reviewFor} onOpenChange={(o) => !o && setReviewFor(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Review {reviewFor?.title}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium mb-2">Your rating</p>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setReviewRating(n)}
+                      className="p-1"
+                      aria-label={`Rate ${n} stars`}
+                    >
+                      <Star className={`h-7 w-7 transition-colors ${n <= reviewRating ? "fill-secondary text-secondary" : "text-muted-foreground/40"}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2">Your feedback</p>
+                <Textarea
+                  placeholder="Tell other buyers about freshness, quality, packaging…"
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReviewFor(null)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!reviewText.trim()) {
+                    toast.error("Please write a short review before submitting.");
+                    return;
+                  }
+                  toast.success("Thanks for your review!", {
+                    description: `${reviewRating}★ for ${reviewFor?.title}`,
+                  });
+                  setReviewFor(null);
+                }}
+              >
+                Submit review
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
