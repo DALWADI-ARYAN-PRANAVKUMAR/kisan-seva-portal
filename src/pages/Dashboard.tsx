@@ -225,7 +225,7 @@ const Dashboard = () => {
                 <ShieldCheck className="h-8 w-8" />
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Please sign in to view your dashboard</h2>
-              <p className="text-sm text-muted-foreground max-w-md mb-6">Your listings, orders, earnings and analytics are private. Sign in with your mobile number — we’ll send you a one-time OTP.</p>
+              <p className="text-sm text-muted-foreground max-w-md mb-6">Your listings, orders, earnings and analytics are private. Sign in with your mobile number and password to continue.</p>
               <div className="flex gap-3">
                 <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 shadow-soft">Sign in</Button>
                 <Button onClick={() => navigate("/auth?from=checkout")} variant="outline">Create account</Button>
