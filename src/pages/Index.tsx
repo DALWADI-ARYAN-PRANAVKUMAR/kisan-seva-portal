@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBasket, Tractor, Wheat, Apple, Carrot, Sparkles, Truck, IndianRupee, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShoppingBasket, Tractor, Wheat, Apple, Carrot, Sparkles, Truck, IndianRupee, ShieldCheck, HelpCircle } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import logo from "@/assets/logo.png";
 
 const fade = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } };
@@ -19,20 +20,20 @@ const Index = () => {
         <div className="absolute inset-0 gradient-warm opacity-60" />
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
-        <div className="container relative py-20 md:py-28">
-          <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7 }} className="flex justify-center mb-8">
+        <div className="container relative pt-6 md:pt-10 pb-16 md:pb-24">
+          <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7 }} className="flex justify-center mb-4 md:mb-6">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-primary/30 blur-3xl scale-110" />
-              <img src={logo} alt="Kisan Seva" className="relative h-80 w-80 md:h-[28rem] md:w-[28rem] lg:h-[32rem] lg:w-[32rem] animate-float drop-shadow-2xl" />
+              <img src={logo} alt="Kisan Seva" className="relative h-40 w-40 sm:h-52 sm:w-52 md:h-72 md:w-72 lg:h-80 lg:w-80 animate-float drop-shadow-2xl" />
             </div>
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-center text-secondary font-semibold tracking-widest text-xs uppercase mb-3">
             {t("hero.kicker")}
           </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }} className="font-display text-4xl md:text-6xl font-bold text-center text-balance max-w-3xl mx-auto leading-tight">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }} className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-center text-balance max-w-3xl mx-auto leading-tight">
             {t("hero.title")}
           </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-center text-muted-foreground mt-5 max-w-2xl mx-auto text-base md:text-lg">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-center text-muted-foreground mt-4 max-w-2xl mx-auto text-sm md:text-lg">
             {t("hero.subtitle")}
           </motion.p>
 
