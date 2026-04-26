@@ -45,13 +45,14 @@ const Marketplace = () => {
     new Set(listings.map((l) => l.location).filter((x): x is string => !!x && x.trim().length > 0))
   ).sort((a, b) => a.localeCompare(b));
 
+  const locQuery = locationFilter.trim().toLowerCase();
   let filtered = listings.filter((l) => {
     if (search && !l.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (cats.length && !cats.includes(l.category)) return false;
     if (l.distance_km != null && l.distance_km > maxKm) return false;
     if (priceRange.min && l.price_per_kg < +priceRange.min) return false;
     if (priceRange.max && l.price_per_kg > +priceRange.max) return false;
-    if (locationFilter !== "all" && (l.location || "") !== locationFilter) return false;
+    if (locQuery && !(l.location || "").toLowerCase().includes(locQuery)) return false;
     return true;
   });
   if (sort === "priceLow") filtered = [...filtered].sort((a, b) => a.price_per_kg - b.price_per_kg);
