@@ -117,25 +117,41 @@ const Marketplace = () => {
             </div>
             <div className="mb-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Location</p>
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="All locations" /></SelectTrigger>
-                <SelectContent className="max-h-64">
-                  <SelectItem value="all">All locations</SelectItem>
+              <div className="relative">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  list="market-location-suggestions"
+                  className="h-9 pl-8 pr-8"
+                  placeholder="Search city or village…"
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                />
+                {locationFilter && (
+                  <button
+                    type="button"
+                    onClick={() => setLocationFilter("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                    aria-label="Clear location"
+                  >
+                    ✕
+                  </button>
+                )}
+                <datalist id="market-location-suggestions">
                   {locationOptions.map((loc) => (
-                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                    <option key={loc} value={loc} />
                   ))}
-                </SelectContent>
-              </Select>
-              {locationOptions.length === 0 && (
-                <p className="text-[10px] text-muted-foreground mt-1.5">No locations yet</p>
-              )}
+                </datalist>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {locationOptions.length > 0 ? "Type any place — suggestions from active listings" : "No locations yet"}
+              </p>
             </div>
             <div className="mb-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("market.distance")}</p>
               <Slider value={[maxKm]} onValueChange={([v]) => setMaxKm(v)} max={200} step={5} />
               <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>0</span><span className="font-semibold text-foreground">{maxKm}km</span><span>200+</span></div>
             </div>
-            <Button variant="outline" className="w-full" onClick={() => { setCats([]); setMaxKm(100); setPriceRange({ min: "", max: "" }); setSearch(""); setLocationFilter("all"); }}>{t("market.reset")}</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setCats([]); setMaxKm(100); setPriceRange({ min: "", max: "" }); setSearch(""); setLocationFilter(""); }}>{t("market.reset")}</Button>
           </aside>
 
           {/* grid */}
