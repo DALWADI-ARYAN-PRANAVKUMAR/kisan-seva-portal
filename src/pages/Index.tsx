@@ -162,7 +162,7 @@ const Index = () => {
               { q: "How is the produce delivered?", a: "Orders are dispatched directly from the farm. Buyers see live order status in their dashboard, and most orders reach the buyer within 24–48 hours." },
               { q: "Is there a commission or middleman fee?", a: "No middlemen. We charge a tiny platform fee so farmers keep up to 40% more than mandi prices." },
               { q: "What payment methods are supported?", a: "UPI (Google Pay, PhonePe, Paytm), credit/debit cards (Visa, Mastercard, RuPay) and Cash on Delivery." },
-              { q: "How do I sign in?", a: "Just enter your mobile number and we’ll send you a one-time password (OTP) to log in securely — no need to remember a password." },
+              { q: "How do I sign in?", a: "Sign in with your mobile number and a password you choose. New here? Tap Create Account to get started in under a minute." },
               { q: "Can I edit a listing after posting?", a: "Yes. Open your dashboard → Active Listings → tap Edit to update price, stock, photo or description anytime." },
               { q: "Is my data safe?", a: "All data is encrypted in transit and at rest. We never share your phone number or personal info with anyone." },
             ].map((item, i) => (
