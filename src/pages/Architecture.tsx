@@ -6,32 +6,56 @@ import {
   ArrowDown, ArrowRight, Server, FileCode, Palette, Languages
 } from "lucide-react";
 
-const Node = ({ icon: Icon, title, subtitle, color = "primary", className = "" }: any) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.4 }}
-    className={`relative rounded-2xl border-2 border-${color}/40 bg-card p-4 shadow-lg hover:shadow-xl hover:scale-105 transition-all min-w-[140px] ${className}`}
-  >
-    <div className={`h-10 w-10 rounded-lg bg-${color}/15 text-${color} flex items-center justify-center mb-2 mx-auto`}>
-      <Icon className="h-5 w-5" />
-    </div>
-    <div className="text-center">
-      <div className="font-bold text-sm">{title}</div>
-      {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
-    </div>
-  </motion.div>
-);
+const colorMap: Record<string, { border: string; bg: string; text: string; bgSolid: string; bgFg: string; borderSoft: string; bgSoft: string }> = {
+  primary: {
+    border: "border-primary/40", bg: "bg-primary/15", text: "text-primary",
+    bgSolid: "bg-primary", bgFg: "text-primary-foreground",
+    borderSoft: "border-primary/30", bgSoft: "bg-primary/5",
+  },
+  secondary: {
+    border: "border-secondary/40", bg: "bg-secondary/15", text: "text-secondary",
+    bgSolid: "bg-secondary", bgFg: "text-secondary-foreground",
+    borderSoft: "border-secondary/30", bgSoft: "bg-secondary/5",
+  },
+  accent: {
+    border: "border-accent/40", bg: "bg-accent/15", text: "text-accent",
+    bgSolid: "bg-accent", bgFg: "text-accent-foreground",
+    borderSoft: "border-accent/30", bgSoft: "bg-accent/5",
+  },
+};
 
-const Layer = ({ title, color, children }: any) => (
-  <div className={`relative rounded-3xl border-2 border-dashed border-${color}/30 bg-${color}/5 p-5 md:p-6`}>
-    <div className={`absolute -top-3 left-5 px-3 py-0.5 rounded-full bg-${color} text-${color}-foreground text-xs font-bold uppercase tracking-wider`}>
-      {title}
+const Node = ({ icon: Icon, title, subtitle, color = "primary", className = "" }: any) => {
+  const c = colorMap[color];
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className={`relative rounded-2xl border-2 ${c.border} bg-card p-4 shadow-lg hover:shadow-xl hover:scale-105 transition-all min-w-[140px] ${className}`}
+    >
+      <div className={`h-10 w-10 rounded-lg ${c.bg} ${c.text} flex items-center justify-center mb-2 mx-auto`}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="text-center">
+        <div className="font-bold text-sm">{title}</div>
+        {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
+      </div>
+    </motion.div>
+  );
+};
+
+const Layer = ({ title, color, children }: any) => {
+  const c = colorMap[color];
+  return (
+    <div className={`relative rounded-3xl border-2 border-dashed ${c.borderSoft} ${c.bgSoft} p-5 md:p-6`}>
+      <div className={`absolute -top-3 left-5 px-3 py-0.5 rounded-full ${c.bgSolid} ${c.bgFg} text-xs font-bold uppercase tracking-wider`}>
+        {title}
+      </div>
+      <div className="flex flex-wrap gap-3 justify-center pt-2">{children}</div>
     </div>
-    <div className="flex flex-wrap gap-3 justify-center pt-2">{children}</div>
-  </div>
-);
+  );
+};
 
 export default function Architecture() {
   return (
