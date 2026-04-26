@@ -21,6 +21,8 @@ export const Navbar = () => {
   const links = [
     { to: "/marketplace", label: t("nav.marketplace") },
     { to: "/dashboard", label: t("nav.dashboard") },
+    { to: "/about", label: "About" },
+    { to: "/architecture", label: "Architecture" },
   ];
 
   return (
