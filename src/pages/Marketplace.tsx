@@ -234,7 +234,7 @@ const Marketplace = () => {
                         <div className="rounded-lg bg-muted/50 p-3 text-xs space-y-1.5 mb-4 mt-auto">
                           <div className="flex items-center gap-1.5 text-foreground font-medium">
                             <User className="h-3 w-3 text-primary" />
-                            <span>By {l.seller_id && farmerMap[l.seller_id] ? farmerMap[l.seller_id] : "Verified Farmer"}</span>
+                            <span>By {l.seller_id ? (farmerMap[l.seller_id] || "Verified Farmer") : "Krishi Bazaar Farms"}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3" />{l.location}</span>

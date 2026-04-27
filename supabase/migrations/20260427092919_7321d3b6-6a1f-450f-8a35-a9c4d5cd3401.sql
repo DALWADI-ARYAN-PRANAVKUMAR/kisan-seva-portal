@@ -1,0 +1,1 @@
+DELETE FROM public.listings WHERE id IN ('0e3ed48e-4461-4929-81cf-df8a1fe7f6a8','cb53b6b8-8e4a-4a2d-89bf-bf1fb0650e03','85486c8e-5120-44ba-9c8e-475075d241b4');
