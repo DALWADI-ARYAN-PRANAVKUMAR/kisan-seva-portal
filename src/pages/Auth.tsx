@@ -6,7 +6,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShoppingBasket, Tractor, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { ShoppingBasket, Tractor, Phone, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
@@ -106,14 +106,26 @@ const Auth = () => {
       </div>
 
       <div className="flex flex-col bg-background">
-        <div className="flex justify-end gap-1 p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><Globe className="h-5 w-5" /></Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {LANGUAGES.map((l) => <DropdownMenuItem key={l.code} onClick={() => i18n.changeLanguage(l.code)}>{l.label}</DropdownMenuItem>)}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="ghost" size="icon" onClick={toggle}>{theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
+        <div className="flex items-center justify-between gap-1 p-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+            className="gap-1.5"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm font-medium">Back</span>
+          </Button>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><Globe className="h-5 w-5" /></Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {LANGUAGES.map((l) => <DropdownMenuItem key={l.code} onClick={() => i18n.changeLanguage(l.code)}>{l.label}</DropdownMenuItem>)}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="icon" onClick={toggle}>{theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
+          </div>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-6">
