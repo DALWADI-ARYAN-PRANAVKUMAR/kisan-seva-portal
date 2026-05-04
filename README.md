@@ -2,6 +2,8 @@
 
 **Kisan Seva** is a modern, bilingual digital marketplace that connects Indian farmers directly with buyers — eliminating middlemen, ensuring fair prices for farmers, and giving buyers access to fresh produce straight from the source.
 
+🔗 **Live Demo:** [https://kisan-seva-portal.vercel.app/](https://kisan-seva-portal.vercel.app/)
+
 ---
 
 ## 📖 About the Project
